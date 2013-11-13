@@ -1,0 +1,14 @@
+gain_kw = GAIN
+gain_val = 1.4
+exptime_kw = EXPTIME
+exptime_val =1.0
+rdnoise_kw = RDNOISE
+rdnoise_val = 5.4
+minval_kw = BADPIX
+minval_val = -1
+maxval_kw = SATURATE
+maxval_val = 65535
+mjd_kw = MJD-OBS
+mjd_val = 52000
+airmass_kw = AIRMASS
+airmass_val = 1.0

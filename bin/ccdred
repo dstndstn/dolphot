@@ -1,0 +1,6 @@
+#! /bin/tcsh
+ccdproc "zero" *.fits
+zerocombine *.fits 3.0 0
+ccdproc "dome flat" *.fits
+flatcombine *.fits 2 0.001 3.0 0 0.01
+ccdproc "object" *.fits

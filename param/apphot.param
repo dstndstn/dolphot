@@ -1,0 +1,8 @@
+apsize = 20 50 100      #photometry radii (pixels)
+apsky = 20.0            #sky annulus
+FitSky = 1              #fit sky (0=no,1=yes,2=full)
+SkySig = 2.25           #sky rejection (in sigma)
+RCentroid = 0           #centroid box (0 for none)
+FSat = 0.999            #saturation fraction
+Zero = 25.              #zero point for 1 DN/s
+Interact = 0            #interactive?
