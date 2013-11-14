@@ -12,6 +12,8 @@ fntype outfn;
 int XMIN,XMAX,YMIN,YMAX;
 int Nstars;
 
+#define Inline static inline
+
 /*
 #include <stdint.h>
 #include <mach/mach_time.h>
@@ -327,14 +329,14 @@ void plotDiagData(void) {
 }
 #endif
 
-inline float skyval(int img,int x,int y) {
+Inline float skyval(int img,int x,int y) {
    if (fsky[img].lastoffset<0) return 0.;
    if (x<0) x=0; else if (x>=dataim[img].X) x=dataim[img].X-1;
    if (y<0) y=0; else if (y>=dataim[img].Y) y=dataim[img].Y-1;
    return sky[img][y][x];
 }
 
-inline float noise(int img,int x,int y,float ssky) {
+Inline float noise(int img,int x,int y,float ssky) {
    float n;
    n=data[img][y][x]-ssky;
    if (n<0) n=0.;
@@ -342,7 +344,7 @@ inline float noise(int img,int x,int y,float ssky) {
    return n/iGAIN[img]+iRN[img];
 }
 
-inline float modelnoise(int img,int x,int y,int dx,int dy,float s,float ssky) {
+Inline float modelnoise(int img,int x,int y,int dx,int dy,float s,float ssky) {
    float n;
 
    n=data[img][y][x]-res[img][y][x];
@@ -353,7 +355,7 @@ inline float modelnoise(int img,int x,int y,int dx,int dy,float s,float ssky) {
    return n/iGAIN[img]+iRN[img];
 }
 
-inline int peak2(int img,int x,int y) {
+Inline int peak2(int img,int x,int y) {
    if (x>0 && data[img][y][x-1]>data[img][y][x] && data[img][y][x-1]<iDMAX[img]) return 0;
    if (x<dataim[img].X-1 && data[img][y][x+1]>data[img][y][x] && data[img][y][x+1]<iDMAX[img]) return 0;
    if (y>0 && data[img][y-1][x]>data[img][y][x] && data[img][y-1][x]<iDMAX[img]) return 0;
@@ -612,7 +614,7 @@ int star_flag(double x0,double y0,int IMG) {
    return best;
 }
 
-inline void eval1_apphot(int img,int ix,int iy,int cx,int cy,float*s,float*ss,float*ssky,float*cs) {
+Inline void eval1_apphot(int img,int ix,int iy,int cx,int cy,float*s,float*ss,float*ssky,float*cs) {
    float c=0,d=0;
    int y1,x1,dx,dy;
 
@@ -634,7 +636,7 @@ inline void eval1_apphot(int img,int ix,int iy,int cx,int cy,float*s,float*ss,fl
    return;
 }
 
-inline void eval1_psfphot(int img,int ix,int iy,int cx,int cy,float*s,float*ss,float*ssky,float*cs) {
+Inline void eval1_psfphot(int img,int ix,int iy,int cx,int cy,float*s,float*ss,float*ssky,float*cs) {
    float c,d,w,n,s0=0.;
 #ifdef USESKYSIG
    float dsky;
@@ -705,7 +707,7 @@ inline void eval1_psfphot(int img,int ix,int iy,int cx,int cy,float*s,float*ss,f
    DP+=d*psf[dy][dx]*a;							\
    PP+=psf[dy][dx]*psf[dy][dx]*a;
 
-inline float eval1_sky3(int img,int ix,int iy,int cx,int cy) {
+Inline float eval1_sky3(int img,int ix,int iy,int cx,int cy) {
    float I=0,P=0,D=0,DP=0,PP=0,a,skywt=0.,b0=0.,X,d;
    int y1,x1,dx,dy,npix=0;
 
@@ -731,7 +733,7 @@ inline float eval1_sky3(int img,int ix,int iy,int cx,int cy) {
    return 0.;
 }
 
-inline float eval1_snr_sky3(int img,int ix,int iy,int cx,int cy,float ct0) {
+Inline float eval1_snr_sky3(int img,int ix,int iy,int cx,int cy,float ct0) {
    float I=0,P=0,PP=0,W=0.,WP=0.,WPP=0.,a,skywt=0.,b0=0,n;
    int y1,x1,dx,dy,npix=0;
 
@@ -758,7 +760,7 @@ inline float eval1_snr_sky3(int img,int ix,int iy,int cx,int cy,float ct0) {
    return 0.;
 }
 
-inline void eval1_apphot_sky3(int img,int ix,int iy,int cx,int cy,float*s,float*ss,float*ssky,float*cs) {
+Inline void eval1_apphot_sky3(int img,int ix,int iy,int cx,int cy,float*s,float*ss,float*ssky,float*cs) {
    float c=0.,d=0.;
    int y1,x1,dx,dy;
 
@@ -785,7 +787,7 @@ inline void eval1_apphot_sky3(int img,int ix,int iy,int cx,int cy,float*s,float*
    return;
 }
 
-inline void eval1_psfphot_sky3(int img,int ix,int iy,int cx,int cy,float*s,float*ss,float*ssky,float*cs) {
+Inline void eval1_psfphot_sky3(int img,int ix,int iy,int cx,int cy,float*s,float*ss,float*ssky,float*cs) {
    float I,P,D,DP,PP,W,WP,WPP,a,n,skywt=0.,b0=0.,d,s0=0.,ssky0=0.,p0=0.,Ppos;
    int y1,x1,dx,dy,it,npix;
 
@@ -931,7 +933,7 @@ inline void eval1_psfphot_sky3(int img,int ix,int iy,int cx,int cy,float*s,float
    WXY+=dx*dy*a;							\
    WYY+=dy*dy*a;
 
-inline float eval1_sky4(int img,int ix,int iy,int cx,int cy,float*mx,float*my) {
+Inline float eval1_sky4(int img,int ix,int iy,int cx,int cy,float*mx,float*my) {
    float I=0,P=0,D=0,DP=0,PP=0,X=0,Y=0,XX=0,XY=0,YY=0,XP=0,YP=0,DX=0,DY=0,a,skywt=0,b0=0,d;
    int y1,x1,dx,dy,npix=0;
 
@@ -960,7 +962,7 @@ inline float eval1_sky4(int img,int ix,int iy,int cx,int cy,float*mx,float*my) {
    return 0.;
 }
 
-inline float eval1_snr_sky4(int img,int ix,int iy,int cx,int cy,float ct0) {
+Inline float eval1_snr_sky4(int img,int ix,int iy,int cx,int cy,float ct0) {
    float I=0,P=0,PP=0,X=0,Y=0,XX=0,XY=0,YY=0,XP=0,YP=0,W=0,WP=0,WPP=0,WXP=0,WYP=0,WX=0,WY=0,WXX=0,WXY=0,WYY=0;
    float a,skywt=0.,b0=0,n,n1,n2,n3,n4,d;
    int y1,x1,dx,dy,npix=0;
@@ -992,7 +994,7 @@ inline float eval1_snr_sky4(int img,int ix,int iy,int cx,int cy,float ct0) {
    return 0.;
 }
 
-inline void eval1_apphot_sky4(int img,int ix,int iy,int cx,int cy,float*s,float*ss,float*ssky,float*mx,float*my,float*cs) {
+Inline void eval1_apphot_sky4(int img,int ix,int iy,int cx,int cy,float*s,float*ss,float*ssky,float*mx,float*my,float*cs) {
    float c=0.,d=0.;
    int y1,x1,dx,dy;
 
@@ -1019,7 +1021,7 @@ inline void eval1_apphot_sky4(int img,int ix,int iy,int cx,int cy,float*s,float*
    return;
 }
 
-inline void eval1_psfphot_sky4(int img,int ix,int iy,int cx,int cy,float*s,float*ss,float*ssky,float*mx,float*my,float*cs) {
+Inline void eval1_psfphot_sky4(int img,int ix,int iy,int cx,int cy,float*s,float*ss,float*ssky,float*mx,float*my,float*cs) {
    float I,P,D,DP,DX,DY,PP,X,Y,XX,XY,YY,XP,YP,W,WP,WPP,WXP,WYP,WX,WY,WXX,WXY,WYY;
    float a,n,skywt=0.,b0=0.,d,s0=0.,ssky0=0.,mx0=0,my0=0,p0=0.,Ppos,n1,n2,n3,n4;
    int y1,x1,dx,dy,it,npix;
@@ -1111,7 +1113,7 @@ inline void eval1_psfphot_sky4(int img,int ix,int iy,int cx,int cy,float*s,float
 #undef INCREMENT_PHOT_NOD
 #undef INCREMENT_PHOT_SKY
 
-inline float eval1_snr(int img,int ix,int iy,int cx,int cy,float ct0) {
+Inline float eval1_snr(int img,int ix,int iy,int cx,int cy,float ct0) {
    float c=0,w,n,ss=0;
    int y1,x1,dx,dy;
 
@@ -3075,7 +3077,7 @@ void setsnmap(int IMG,int x0,int x1,int y0,int y1) {
    return;
 }
 
-inline float peaksn(int img,int x,int y) {
+Inline float peaksn(int img,int x,int y) {
    if (img<0) {
       if (x<=0 || y<=0 || x>=X*SubResRef-1 || y>=Y*SubResRef-1) return 0.;
    }
@@ -3084,7 +3086,7 @@ inline float peaksn(int img,int x,int y) {
    return snmap[y][x];
 }
 
-inline float qpeak(int x,int y,int strict) {
+Inline float qpeak(int x,int y,int strict) {
    if (x<=0 || y<=0 || x>=X*SubResRef-1 || y>=Y*SubResRef-1) return 0.;
    if (strict && ran[y][x]) return 0;
    return peaksn(-1,x,y);
@@ -4576,7 +4578,7 @@ float dbrent(float ax, float bx, float cx, float (*f)(float,int,float3*,float3*,
 #define SIGCAP 10
 float *slist;
 
-inline float getapsize(int img,int i) {
+Inline float getapsize(int img,int i) {
 #ifdef USEWFPC2
    if (hstmode[img].inst==WFPC2) {
       double tx,ty;
@@ -5228,7 +5230,7 @@ chiptype *data0;
 int Nrealstar;
 realstartype *realstar;
 
-inline int bestmatch(double x0,double y0) {
+Inline int bestmatch(double x0,double y0) {
    int i=-1,j;
    float rmin,r;
 
