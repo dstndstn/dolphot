@@ -1,6 +1,8 @@
 #include <fits.h>
 #include <time.h>
 
+#define Inline static inline
+
 //parameters
 int X=1024,Y=1024,Round=1,Noise=1,RPSF=15,SubPixel=1,FPSF=4;
 double bg=1,GN=1,RN=1,EXP=100;
@@ -173,7 +175,7 @@ void setpsfkernel(void) {
    }
 }
 
-inline double evalpsf(double x) {
+Inline double evalpsf(double x) {
    int i;
    if (x<0) x=-x;
    x*=100.;

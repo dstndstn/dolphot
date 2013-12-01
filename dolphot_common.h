@@ -5,6 +5,8 @@
 #define DOLPHOT_MAIN
 #include "dolphot_defs.h"
 
+#define Inline static inline
+
 // Definitions
 typedef char fntype[161];
 typedef int int2[2];
@@ -72,7 +74,7 @@ void perr(char *str) {
    exit(0);
 }
 
-inline double SQR(double x) {return x*x;}
+Inline double SQR(double x) {return x*x;}
 
 void initimgdata(void) {
    int i,j,k;
@@ -606,23 +608,23 @@ void freclose(FILE*f,long*off) {
 }
 */
 
-inline int posOK(int i,int x,int y) {
+Inline int posOK(int i,int x,int y) {
    return (x>=0 && x<dataim[i].X && y>=0 && y<dataim[i].Y);
 }
 
-inline int dataOK(int i,int x,int y) {
+Inline int dataOK(int i,int x,int y) {
    return (data[i][y][x]>iDMIN[i] && data[i][y][x]<iDMAX[i]);
 }
 
-inline int datafOK(int i,int x,int y) {
+Inline int datafOK(int i,int x,int y) {
    return (data[i][y][x]>iDMIN[i] && data[i][y][x]<iDMAX[i]*FSat);
 }
 
-inline int ppixOK(int i,int x,int y) {
+Inline int ppixOK(int i,int x,int y) {
    return (x>=0 && x<dataim[i].X && y>=0 && y<dataim[i].Y && data[i][y][x]>iDMIN[i] && data[i][y][x]<iDMAX[i]);
 }
 
-inline int ppixfOK(int i,int x,int y) {
+Inline int ppixfOK(int i,int x,int y) {
    return (x>=0 && x<dataim[i].X && y>=0 && y<dataim[i].Y && data[i][y][x]>iDMIN[i] && data[i][y][x]<iDMAX[i]*FSat);
 }
 
@@ -698,7 +700,7 @@ void setpsfkernel(void) {
    return;
 }
 
-inline double evalpsf(double x) {
+Inline double evalpsf(double x) {
    int i;
    if (x<0) x=-x;
    x*=100.;
@@ -710,7 +712,7 @@ inline double evalpsf(double x) {
    return (1+i-x)*psfkernel[i]+(x-i)*psfkernel[i+1];
 }
 
-inline void add_poff(int img,int r) {
+Inline void add_poff(int img,int r) {
    int i,j;
    if (POSPSF) {
       //double a=0,b=0;

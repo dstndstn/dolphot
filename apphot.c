@@ -1,6 +1,8 @@
 #include <fits.h>
 #include <unistd.h>
 
+#define Inline static inline
+
 #ifdef PGPLOT
 #include PGHEAD
 extern void display(ftype*,int,int,double*,double*,char*,int);
@@ -74,25 +76,25 @@ FSat-fraction of saturate limit for final throw-out (float)
 Zero-zeropoint for 1 DN/s (float)
 */
 
-inline int pixsat(int x,int y,int z) {
+Inline int pixsat(int x,int y,int z) {
    return (x>=0 && x<data->X && y>=0 && y<data->Y && data->data[z][y][x]>=DMAX);
 }
 
-inline int ppixOK(int x,int y,int z) {
+Inline int ppixOK(int x,int y,int z) {
    return (x>=0 && x<data->X && y>=0 && y<data->Y && data->data[z][y][x]>DMIN && data->data[z][y][x]<DMAX);
 }
 
-inline int ppixfOK(int x,int y,int z) {
+Inline int ppixfOK(int x,int y,int z) {
    return (x>=0 && x<data->X && y>=0 && y<data->Y && data->data[z][y][x]>DMIN && data->data[z][y][x]<DMAX*FSat);
 }
 
-inline float skyval(int x,int y,int z) {
+Inline float skyval(int x,int y,int z) {
    if (x<0) x=0; else if (x>=data->X) x=data->X-1;
    if (y<0) y=0; else if (y>=data->Y) y=data->Y-1;
    return sky->data[z][y][x];
 }
 
-inline float noise(int x,int y,int z) {
+Inline float noise(int x,int y,int z) {
    float s=skyval(x,y,z);
    if (x<0) x=0; else if (x>=data->X) x=data->X-1;
    if (y<0) y=0; else if (y>=data->Y) y=data->Y-1;

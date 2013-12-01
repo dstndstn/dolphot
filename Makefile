@@ -11,7 +11,8 @@ export BASE_DIR = $(shell pwd)
 #export PGPLOT = -L/usr/local/lib -lcpgplot -lpgplot -lpng -L/usr/X11R6/lib -lX11 -L/usr/lib -lgcc
 
 #compilation flags
-export CFLAGS= -O3 -Wall
+#export CFLAGS= -O3 -Wall
+export CFLAGS= -O0 -g -Wall
 
 #uncomment if you will be using the WFPC2 module
 #export USEWFPC2=1
@@ -20,7 +21,7 @@ export CFLAGS= -O3 -Wall
 #export USEACS=1
 
 #uncomment if you will be using the WFC3 module
-#export USEWFC3=1
+export USEWFC3=1
 
 #set the directory where Tiny Tim binaries are located (ACS/WFPC2/WFC3 PSF generation):
 #export USETT=1
