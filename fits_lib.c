@@ -317,7 +317,12 @@ void readchip(FILE *f,chiptype chip,imtype*img) {
            mapsize  = nbytes + gap;
            delta = gap;
 
-           map = mmap(0, mapsize, PROT_READ, MAP_SHARED, fileno(f), mapstart);
+           map = mmap(0, mapsize,
+                      //PROT_READ,
+                      //MAP_SHARED,
+                      PROT_READ | PROT_WRITE,
+                      MAP_PRIVATE,
+                      fileno(f), mapstart);
            if (map == MAP_FAILED) {
                fprintf(stderr, "Failed to mmap file: %s\n", strerror(errno));
                exit(-1);
