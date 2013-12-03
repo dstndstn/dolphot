@@ -20,7 +20,7 @@ export CFLAGS= -O3 -Wall
 #export USEACS=1
 
 #uncomment if you will be using the WFC3 module
-#export USEWFC3=1
+export USEWFC3=1
 
 #set the directory where Tiny Tim binaries are located (ACS/WFPC2/WFC3 PSF generation):
 #export USETT=1
