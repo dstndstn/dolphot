@@ -1,4 +1,11 @@
+wget "http://americano.dolphinsim.com/dolphot/WFC3_IR_F160W.tar.gz"
+tar xzf WFC3_IR_F160W.tar.gz
+mv dolphot2.0/wfc3/data/F160W.ir.psf wfc3/data/
+
+
 fits-flip-endian -i ibfe06dqq_F160W_flt.fits -o flipped-ibfe06dqq_F160W_flt.fits -e 1 -s 4
+
+gdb --args ./bin/dolphot mmap.out -pmmap.param
 
 
 imtype: include/fits.h

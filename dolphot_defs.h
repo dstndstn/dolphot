@@ -28,6 +28,8 @@ typedef int hstoffsettype[2];
 #define EXTERN extern
 #endif
 
+//EXTERN int use_mmap;
+
 EXTERN hstmodetype *hstmode;
 EXTERN apsftype *apsf;
 EXTERN apskytype *apsky;
