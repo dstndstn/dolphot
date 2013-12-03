@@ -6,13 +6,13 @@ typedef float float3[3];
 // uncomment out to use single aperture correction
 //#define SINGLE_APCOR
 
+//int use_mmap = 0;
+
 // Standard photometry flags
 int IMDIFF=0,NOSKY34=0;
 fntype outfn;
 int XMIN,XMAX,YMIN,YMAX;
 int Nstars;
-
-#define Inline static inline
 
 /*
 #include <stdint.h>
@@ -5883,6 +5883,7 @@ int main(int argc,char**argv) {
    if (argc<2) {
       printf("****Usage: %s <output> <<options>>\n",*argv);
       printf("  -p<name>  for parameter file\n");
+      //printf("  -m        to use mmap\n");
       printf("  x=y       to set flag x to value y\n");
       return 1;
    }
@@ -5907,6 +5908,7 @@ int main(int argc,char**argv) {
    paramfile("dolphot.param",&dolphotparam);
    for (i=2;i<argc;i++) {
       if (!strncmp(argv[i],"-p",2) || !strncmp(argv[i],"-P",2)) paramfile1(argv[i]+2,&dolphotparam);
+      //if (!strncmp(argv[i],"-m",2) || !strncmp(argv[i],"-M",2)) use_mmap = 1;
       else parseparam(argv[i],&dolphotparam);
    }
    // sanity check

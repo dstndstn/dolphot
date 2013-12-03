@@ -1,0 +1,76 @@
+fits-flip-endian -i ibfe06dqq_F160W_flt.fits -o flipped-ibfe06dqq_F160W_flt.fits -e 1 -s 4
+
+
+imtype: include/fits.h
+
+
+dolphot.c : procframe()
+
+fits_lib.c : readimage(FILE*, imtype*)
+
+fits_lib.c : readchip()
+
+dolphot_lib.c : ffread()
+  (fread + endian4)
+
+
+
+
+
+#0  readimage (f=0x7fff714f4398, img=0x100103f70) at fits_lib.c:593
+#1  0x000000010003d725 in procframe (ext=0) at dolphot.c:5561
+#2  0x0000000100041802 in main (argc=3, argv=0x7fff5fbff780) at dolphot.c:6094
+
+(gdb) p *img
+$6 = {
+  Ncards = 152, 
+  Nmax = 154, 
+  X = 0, 
+  Y = 0, 
+  Z = 0, 
+  bits = 16, 
+  pcount = 0, 
+  tfields = 0, 
+  bzero = 0, 
+  bscale = 1, 
+  xtension = "IMAGE", '\0' <repeats 51 times>, "#\b???1??h\000\000\000\001\000\000\000\003\000\000\000\000\000\000\000?", 
+  cards = 0x100805200, 
+  data = 0x1, 
+  bintabdata = 0x0
+}
+
+img->Z = 0
+nothing read
+
+readchip:
+
+Reading FITS file ibfe06dqq_F160W_flt.fits
+Reading IMAGE extension: 1014x1014
+  GAIN=1.00 EXP=399s NOISE=20.00 BAD=-4900.68 SAT=5679716.00
+
+Breakpoint 3, readchip (f=0x7fff714f4398, chip=0x100819400, img=0x100103f70) at fits_lib.c:301
+301	   if (img->bits==-32) {
+(gdb) where
+#0  readchip (f=0x7fff714f4398, chip=0x100819400, img=0x100103f70) at fits_lib.c:301
+#1  0x000000010003e290 in procframe (ext=1) at dolphot.c:5664
+#2  0x00000001000420d0 in main (argc=3, argv=0x7fff5fbff780) at dolphot.c:6163
+
+(gdb) p *img
+$10 = {
+  Ncards = 127, 
+  Nmax = 140, 
+  X = 1014, 
+  Y = 1014, 
+  Z = 1, 
+  bits = -32, 
+  pcount = 0, 
+  tfields = 0, 
+  bzero = 0, 
+  bscale = 1, 
+  xtension = "IMAGE\000  '", ' ' <repeats 11 times>, "/ Image extension", ' ' <repeats 32 times>, '\0' <repeats 11 times>, 
+  cards = 0x100805200, 
+  data = 0x0, 
+  bintabdata = 0x0
+}
+
+

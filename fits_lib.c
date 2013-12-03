@@ -1,6 +1,9 @@
 #define FITS_C
 #include <fits.h>
 #include <stdint.h>
+#include <unistd.h>
+#include <sys/mman.h>
+#include <errno.h>
 
 int fitsparam(char*var,char*val) {
    double x;
@@ -287,6 +290,8 @@ void readexth(FILE *f,imtype*img,int ver) {
    return;
 }
 
+int use_mmap = 1;
+
 void readchip(FILE *f,chiptype chip,imtype*img) {
    int i,j;
    int32_t l;
@@ -299,11 +304,44 @@ void readchip(FILE *f,chiptype chip,imtype*img) {
       exit(-1);
    }
    if (img->bits==-32) {
-      ffread(chip[0],(img->X)*(img->Y),4,f);
-      if (img->bscale==1. && img->bzero==0.) return;
-      fp=chip[0]; fpmax=fp+(img->X)*(img->Y);
-      while (fp<fpmax) (*fp)=(*fp)*img->bscale+img->bzero;
-      return;
+       if (use_mmap && img->bscale == 1. && img->bzero == 0.) {
+           off_t nbytes = img->X * img->Y * 4;
+           off_t start = ftello(f);
+           off_t mapstart, mapsize;
+           int delta;
+           int ps = getpagesize();
+           int gap = start % ps;
+           void* map;
+           // start must be a multiple of pagesize.
+           mapstart = start  - gap;
+           mapsize  = nbytes + gap;
+           delta = gap;
+
+           map = mmap(0, mapsize, PROT_READ, MAP_SHARED, fileno(f), mapstart);
+           if (map == MAP_FAILED) {
+               fprintf(stderr, "Failed to mmap file: %s\n", strerror(errno));
+               exit(-1);
+           }
+           printf("Mmapped file: offset %i + size %i\n",
+                  (int)mapstart, (int)mapsize);
+           printf("addr: %p + %i => %p to %p\n", map, delta, map+delta,
+                  map+nbytes);
+
+           chip[0] = map + delta;
+
+           printf("pixel 0: %g\n", chip[0][0]);
+
+           // pretend we read the data
+           fseeko(f, nbytes, SEEK_CUR);
+           return;
+
+       } else {
+           ffread(chip[0],(img->X)*(img->Y),4,f);
+           if (img->bscale==1. && img->bzero==0.) return;
+           fp=chip[0]; fpmax=fp+(img->X)*(img->Y);
+           while (fp<fpmax) (*fp)=(*fp)*img->bscale+img->bzero;
+           return;
+       }
    }
    for (i=0;i<img->Y;i++) {
       if (img->bits==32) {
