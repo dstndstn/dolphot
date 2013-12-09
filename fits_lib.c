@@ -345,7 +345,6 @@ void readchip(FILE *f,chiptype chip,imtype*img, int use_mmap) {
                   map+nbytes);
 
            chip[0] = map + delta;
-
            // from allocchip
            for (i=1; i<img->Y; i++)
                chip[i] = chip[i-1] + img->X;

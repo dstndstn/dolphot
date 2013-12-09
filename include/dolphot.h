@@ -8,6 +8,8 @@
 typedef float ***imgtype;
 typedef float **chiptype;
 
+typedef float ** const constchiptype;
+
 #ifndef DOLPHOT_C
 extern int ferr(FILE*,char*);
 extern void merr(void);

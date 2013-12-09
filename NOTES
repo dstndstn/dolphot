@@ -130,8 +130,6 @@ dolphot.c : 5609      res[img]=allocchip(dataim[img].X,dataim[img].Y);
 
 dolphot_lib.c : 17   chiptype allocchip(int X,int Y) {
 
-
-
 :~5702:
 
 	 for (img=0;img<Timg;img++) {
@@ -154,30 +152,6 @@ dolphot_lib.c : 17   chiptype allocchip(int X,int Y) {
 find() --> find stars
 (dolphot.c)
 
-x=1, y=3 in peaksn,
-#0  peaksn (img=-1, x=1, y=3) at dolphot.c:3086
-#1  0x0000000100033e85 in qpeak (x=1, y=3, strict=1) at dolphot.c:3095
-#2  0x0000000100033468 in find (show=1) at dolphot.c:4305
-#3  0x000000010003feda in procframe (ext=1) at dolphot.c:5789
-#4  0x0000000100042f1a in main (argc=3, argv=0x7fff5fbff798) at dolphot.c:6194
-
-snmmap -- totally different
-
-
-
-
-> ./bin/dolphot orig.out -porig.param
-Cannot match parameter name:
-UseWFC3
-Reading FITS file ibfe06dqq_F160W_flt.fits
-Reading IMAGE extension: 1014x1014
-  GAIN=1.00 EXP=399s NOISE=20.00 BAD=-4900.68 SAT=5679716.00
-** Extension 1, Chip 1 **
-Finding stars: ...........................
-64961 found
-4734 stars eliminated
-847 stars eliminated
-[...]
 
 > ./bin/dolphot orig.out -porig.param
 Cannot match parameter name:
@@ -191,61 +165,46 @@ iDMIN[0] = -5679716.000000, iDMIN0[0] = -4900.683105
 nok=1008869, nlow=19327
 Finding stars: ..
 
+-------------------------------------------------------------------------------
 
---------------------------------------------------------------------------
+does data continue to be used?
 
-> ./bin/dolphot mmap.out -pmmap.param
-Cannot match parameter name:
-UseWFC3
-Reading FITS file flipped-ibfe06dqq_F160W_flt.fits
-Reading IMAGE extension: 1014x1014
-  GAIN=1.00 EXP=399s NOISE=20.00 BAD=-4900.68 SAT=5679716.00
-read data 0
-Mmapped file: offset 24576 + size 4114128
-addr: 0x114b8e000 + 1344 => 0x114b8e540 to 0x114f7a190
-pixel 0: 365.213
-** Extension 1, Chip 1 **
-iDMIN[0] = -5679716.000000, iDMIN0[0] = -4900.683105
-nok=1008869, nlow=19327
-Finding stars: ..
+use a copy-on-write for res?
 
+snmap
+snmmap
+ran
 
-
-
-
-Cannot match parameter name:
-UseWFC3
-Reading FITS file flipped-ibfe06dqq_F160W_flt.fits
-Reading IMAGE extension: 1014x1014
-  GAIN=1.00 EXP=399s NOISE=20.00 BAD=-4900.68 SAT=5679716.00
+data[]:
+  noise()
+  modelnoise()
+  peak2()
+  centroid()
+  star_flag()
+  eval1_apphot()
+  eval1_psfphot()
+  eval1_apphot_sky3()
+  eval1_psfphot_sky3()
+  eval1_apphot_sky4()
+  eval1_psfphot_sky4()
 
 
+include/dolphot.h :
+typedef float ***imgtype;
+typedef float **chiptype;
+
+typedef float ** const constchiptype;
+
+dolphot_common.h :
+chiptype *data,*sky,*res;
+imtype *skyim,*resim;
+
+data[img][y][x]
 
 
+const version??
 
+--mmap() in READ_ONLY mode failed... *pr=*pd=iDMIN[]-1 jazz
 
-
-
-460,067 found
-231,718 stars eliminated
- 18,039 stars eliminated
-  4,194 stars eliminated
-  1,877 stars eliminated
-  1,060 stars eliminated
-    650 stars eliminated
-    465 stars eliminated
-    327 stars eliminated
-    255 stars eliminated
-    199 stars eliminated
-    140 stars eliminated
-    115 stars eliminated
-     93 stars eliminated
-
-32 PSF stars; 5999 neighbors
-Central pixel PSF adjustments:
-image 1: 32 stars, -0.286399
-1893 stars eliminated
-
-
-
+-get memory mappings for process
 

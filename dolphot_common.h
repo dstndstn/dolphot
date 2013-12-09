@@ -59,7 +59,12 @@ stype *stars;
 double *iRN,*iAIR;
 float *iDMAX,*iDMIN,*iDMIN0,***poff,*sky_val,*sky_unc;
 fntype *base;
+
 chiptype *data,*sky,*res;
+//chiptype *tempdata;
+//constchiptype *data;
+//chiptype *sky,*res;
+
 imtype *skyim,*resim;
 double *refmult;
 float *refcts,*refmag;
