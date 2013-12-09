@@ -3048,6 +3048,8 @@ void setsnmap(int IMG,int x0,int x1,int y0,int y1) {
    double fx,fy;
    float s,ss,c,ndof,sh,ssky,mx,my,cs,cm,pa,pb,pc;
 
+   //printf("setsnmap\n");
+
    for (img=0;img<Nimg || (img==Nimg && IMG==Nimg);img++) if (IMG<0 || img==IMG) {
       shift(img,0.5*(XMIN+XMAX),0.5*(YMIN+YMAX),&fx,&fy,1);
       pa=apsf[img][0][0]+(apsf[img][0][3]+apsf[img][0][4])/12.;
@@ -3088,7 +3090,10 @@ Inline float peaksn(int img,int x,int y) {
 
 Inline float qpeak(int x,int y,int strict) {
    if (x<=0 || y<=0 || x>=X*SubResRef-1 || y>=Y*SubResRef-1) return 0.;
-   if (strict && ran[y][x]) return 0;
+   if (strict && ran[y][x]) {
+       //printf("ran[%i][%i]: %i\n", y, x, ran[y][x]);
+       return 0;
+   }
    return peaksn(-1,x,y);
 }
 
@@ -4283,6 +4288,8 @@ void find(int show) {
    if (show) {printf("Finding stars: "); fflush(stdout);}
    setindx(-1);
    fsigm=SigFind*SigFindMult;
+   printf("find: SigFind %f, SigFindMult %f, fsigm %f SubResRef %i X %i Y %i\n",
+          SigFind, SigFindMult, fsigm, SubResRef, X, Y);
    memset(ran[0],0,X*Y*SubResRef*SubResRef);
    clearsnmap();
    NO_SKY=1;
@@ -4292,13 +4299,22 @@ void find(int show) {
    while (sigmin>fsigm) {
       sigmin*=0.5;
       if (sigmin<fsigm) sigmin=fsigm;
-      for (x=XMIN*SubResRef+1;x<XMAX*SubResRef-1;x++) for (y=YMIN*SubResRef+1;y<YMAX*SubResRef-1;y++) if ((p=qpeak(x,y,1))>=sigmin && p<sigmax) {
-	 phot(x/(double)SubResRef,y/(double)SubResRef,-1,0);
-	 for (;nf<Nstars;nf++) imgsub(nf);
-      }
-      sigmax=sigmin;
+
+      printf("sigmin %g, XMIN %i, XMAX %i, YMIN %i, YMAX %i\n",
+             sigmin, XMIN, XMAX, YMIN, YMAX);
+
+      for (x=XMIN*SubResRef+1;x<XMAX*SubResRef-1;x++) for (y=YMIN*SubResRef+1;y<YMAX*SubResRef-1;y++) {
+              //printf("qpeak(x=%i,y=%i,1) = %g\n", x, y, qpeak(x,y,1));
+              if ((p=qpeak(x,y,1))>=sigmin && p<sigmax) {
+                  phot(x/(double)SubResRef,y/(double)SubResRef,-1,0);
+                  for (;nf<Nstars;nf++) imgsub(nf);
+              }
+          }
+      printf("nf %i, Nstars %i\n", nf, Nstars);
+     sigmax=sigmin;
    }
    for (i=0;i<SecondPass;i++) {
+       printf("secondPass %i\n", i);
       if (show) {printf("."); fflush(stdout);}
       memset(ran[0],0,X*Y*SubResRef*SubResRef);
       for (y=0;y<Y*SubResRef;y++) for (x=0;x<X*SubResRef;x++) if (indx[y][x]>=0) {
@@ -5558,7 +5574,7 @@ void procframe(int ext) {
    if (!isimage(dataim)) {
       for (img=0;img<Timg;img++) {
 	 fopenagain(fdata+img);
-	 readimage(fdata[img].f,dataim+img);
+	 readimage(fdata[img].f,dataim+img, fdata[img].use_mmap);
 	 freclose(fdata+img);
 	 if (!FakeStars[0] && img<Nimg) {
 	    fopenagain(fres+img);
@@ -5603,6 +5619,7 @@ void procframe(int ext) {
    ptr=malloc(X*Y*SubResRef*SubResRef*INTSIZE); if (!ptr) merr();
    for (y=0;y<Y*SubResRef;y++) indx[y]=ptr+(X*SubResRef)*y*INTSIZE;
    for (img=0;img<Timg;img++) {
+       // FIXME -- full image data array allocated here
       data[img]=allocchip(dataim[img].X,dataim[img].Y);
       if (fsky[img].lastoffset>=0) sky[img]=allocchip(dataim[img].X,dataim[img].Y);
       res[img]=allocchip(dataim[img].X,dataim[img].Y);
@@ -5660,12 +5677,14 @@ void procframe(int ext) {
       else if (hstmode[Nimg].inst==NONE) DRIZZLE_BASE=1;
       out1starinfo();
       for (img=0;img<Timg;img++) {
+          printf("read data %i\n", img);
 	 fopenagain(fdata+img);
-	 readchip(fdata[img].f,data[img],dataim+img);
+	 readchip(fdata[img].f,data[img], dataim+img, fdata[img].use_mmap);
 	 freclose(fdata+img);
 	 if (fsky[img].lastoffset>=0) {
+          printf("read sky %i\n", img);
 	    fopenagain(fsky+img);
-	    readchip(fsky[img].f,sky[img],dataim+img);
+	    readchip(fsky[img].f,sky[img],dataim+img, fdata[img].use_mmap);
 	    freclose(fsky+img);
 	 }
       }
@@ -5690,13 +5709,26 @@ void procframe(int ext) {
 	 }
 	 else readinfo(finfo,ext,z);
 	 for (img=0;img<Timg;img++) {
+         printf("iDMIN[%i] = %f, iDMIN0[%i] = %f\n",
+                img, iDMIN[img], img, iDMIN0[img]);
 	    if (iDMIN[img]<iDMIN0[img]) {
 	       float *pd,*pr,*plast;
 	       plast=data[img][0]+dataim[img].Y*dataim[img].X;
+           int nlow = 0, nok=0;
+           float sum1 = 0., sum2 = 0.;
 	       for (pd=data[img][0],pr=res[img][0];pd<plast;pd++,pr++) {
-		  if (*pd<=iDMIN0[img]) *pd=*pr=iDMIN[img]-1;
-		  else *pr=*pd;
+               if (*pd<=iDMIN0[img]) {
+                   *pd=*pr=iDMIN[img]-1;
+                   nlow++;
+               } else {
+                   *pr=*pd;
+                   nok++;
+               }
+               sum1 += *pr;
+               sum2 += *pr;
 	       }
+           printf("nok=%i, nlow=%i\n", nok, nlow);
+           printf("sum1=%f, sum2=%f\n", sum1, sum2);
 	    }
 	    else memcpy(res[img][0],data[img][0],dataim[img].X*dataim[img].Y*FLOATSIZE);
 	    if (!FakeStars[0] && !UsePhot[0]) {
@@ -6080,7 +6112,7 @@ int main(int argc,char**argv) {
 	       tfits.img.Nmax=0;
 	    }
 	    else {
-	       readimage(fpsf[img].f,&(tfits.img));
+            readimage(fpsf[img].f,&(tfits.img), 0);
 	       freeimg(tfits.img.data,tfits.img.X,tfits.img.Y,tfits.img.Z);
 	    }
 	    freclose(fpsf+img);
@@ -6155,7 +6187,7 @@ int main(int argc,char**argv) {
 		  }
 	       }
 	       else {
-		  readimage(fpsf[img].f,&(tfits.img));
+               readimage(fpsf[img].f,&(tfits.img), 0);
 		  freeimg(tfits.img.data,tfits.img.X,tfits.img.Y,tfits.img.Z);
 	       }
 	       freclose(fpsf+img);

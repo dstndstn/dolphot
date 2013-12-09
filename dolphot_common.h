@@ -567,19 +567,31 @@ typedef struct {
    FILE *f;
    char fname[801];
    char mode[3];
+
+    int use_mmap;
+
 } reopenableFile;
 
 void fopenagain(reopenableFile*ptr) {
+    printf("fopenagain %s, use_mmap %i\n", ptr->fname, ptr->use_mmap);
    ptr->f=fopen(ptr->fname,ptr->mode);
    if (ptr->f==NULL) {printf("Error: cannot re-open %s\n",ptr->fname); exit(-1);}
    if (ptr->lastoffset!=0) fseek(ptr->f,ptr->lastoffset,SEEK_SET);
 }
 
 void fopenfirst(reopenableFile*ptr,char*fname,char*mode,int open) {
+    printf("fopenfirst %s\n", fname);
    strcpy(ptr->fname,fname);
    strcpy(ptr->mode,mode);
    ptr->lastoffset=0;
    ptr->f=0;
+
+   ptr->use_mmap = 0;
+   if (strncmp(fname, "flipped-", 8) == 0) {
+       ptr->use_mmap = 1;
+       printf("Using mmap()\n");
+   }
+
    if (open==1) fopenagain(ptr);
 }
 

@@ -10,9 +10,11 @@ export BASE_DIR = $(shell pwd)
 #export PGHEAD = \"/usr/local/include/cpgplot.h\"
 #export PGPLOT = -L/usr/local/lib -lcpgplot -lpgplot -lpng -L/usr/X11R6/lib -lX11 -L/usr/lib -lgcc
 
+UCFLAGS ?=
+
 #compilation flags
 #export CFLAGS= -O3 -Wall
-export CFLAGS= -O0 -g -Wall
+export CFLAGS= $(UCFLAGS) -O0 -g -Wall 
 
 #uncomment if you will be using the WFPC2 module
 #export USEWFPC2=1
@@ -41,8 +43,15 @@ export CFLAGS+= -DNAN_PRINT
 export CFLAGS += -DBASEDIR='"$(BASE_DIR)"' -I$(BASE_DIR)/include
 
 #definitions
-ALLEXE = dolphot_lib.o fits_lib.o bin/addstars bin/apphot bin/calcsky bin/dolphot bin/synthimg bin/fakelist
-ALL = $(ALLEXE) ccdred
+
+# dstn -- just dolphot target
+#ALLEXE = dolphot_lib.o fits_lib.o bin/addstars bin/apphot bin/calcsky bin/dolphot bin/synthimg bin/fakelist
+#ALL = $(ALLEXE) ccdred
+
+ALLEXE = dolphot_lib.o fits_lib.o bin/dolphot
+#bin/addstars bin/apphot bin/calcsky bin/synthimg bin/fakelist
+ALL = $(ALLEXE)
+
 DOLPHOT_DEP = dolphot_lib.o fits_lib.o dolphot_common.h dolphot_defs.h
 DOLPHOT_OBJ = dolphot_lib.o fits_lib.o
 DOLPHOT_FOBJ =

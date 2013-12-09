@@ -290,20 +290,32 @@ void readexth(FILE *f,imtype*img,int ver) {
    return;
 }
 
-int use_mmap = 1;
+/*
+ #ifdef USE_MMAP
+ int use_mmap = 1;
+ #else
+ int use_mmap = 0;
+ #endif
+ */
+#include <assert.h>
 
-void readchip(FILE *f,chiptype chip,imtype*img) {
+void readchip(FILE *f,chiptype chip,imtype*img, int use_mmap) {
    int i,j;
    int32_t l;
    int16_t s;
    int8_t c;
    float *fp,*fpmax;
 
+   if (!((use_mmap == 0) || (use_mmap == 1))) {
+       assert(0);
+   }
+
    if (sizeof(float)!=4 || sizeof(double)!=8 || sizeof(int32_t)!=4 || sizeof(int16_t)!=2 || sizeof(int8_t)!=1) {
       printf("Incorrect data sizes in fits_lib.c\n");
       exit(-1);
    }
    if (img->bits==-32) {
+       printf("readchip: mmap %i\n", use_mmap);
        if (use_mmap && img->bscale == 1. && img->bzero == 0.) {
            off_t nbytes = img->X * img->Y * 4;
            off_t start = ftello(f);
@@ -333,6 +345,11 @@ void readchip(FILE *f,chiptype chip,imtype*img) {
                   map+nbytes);
 
            chip[0] = map + delta;
+
+           // from allocchip
+           for (i=1; i<img->Y; i++)
+               chip[i] = chip[i-1] + img->X;
+
 
            printf("pixel 0: %g\n", chip[0][0]);
 
@@ -629,9 +646,11 @@ char*gettablevalstring(imtype*img,char*val,int row,int err) {
 }
 #undef MAXTABSTR
 
-void readimage(FILE *f,imtype*img) {
+void readimage(FILE *f,imtype*img, int use_mmap) {
    int skip,z;
    char ch[2880];
+
+   printf("readimage: use_mmap %i\n", use_mmap);
 
    img->bintabdata=NULL;
    if (!strcasecmp(img->xtension,"BINTABLE")) {
@@ -642,7 +661,7 @@ void readimage(FILE *f,imtype*img) {
    else {
       img->bintabdata=0;
       img->data=allocimg(img->X,img->Y,img->Z);
-      for (z=0;z<img->Z;z++) readchip(f,img->data[z],img);
+      for (z=0;z<img->Z;z++) readchip(f,img->data[z],img, use_mmap);
    }
    skip=abs(img->bits)/8*img->X*img->Y*img->Z+img->pcount;
    skip=((skip+2879)/2880)*2880-skip;
@@ -652,13 +671,14 @@ void readimage(FILE *f,imtype*img) {
 void readbody(FILE *f,ftype*fits,int ver) {
    int i;
 
-   readimage(f,&(fits->img));
+   printf("readbody\n");
+   readimage(f,&(fits->img), 0);
    if (fits->Next>0) {
       fits->ext=(imtype*)calloc(sizeof(imtype),fits->Next);
       if (!fits->ext) merr();
       for (i=0;i<fits->Next;i++) {
 	 readexth(f,fits->ext+i,ver);
-	 readimage(f,&(fits->ext[i]));
+	 readimage(f,&(fits->ext[i]), 0);
       }
    }
    fclose(f);
